@@ -1,13 +1,38 @@
-import { Text, View, Pressable, ScrollView, SafeAreaView, Image, StyleSheet } from "react-native";
+import { Text, View, Pressable, ScrollView, SafeAreaView } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native"
 import { useState } from 'react';
 import { Stack } from 'expo-router';
-import { COLORS, SIZES } from "../constants";
+import { COLORS, icons, images, SIZES } from "../constants";
+import { ScreenHeaderBtn } from '../components'
 import axios from "axios";
-import { Link } from 'expo-router';
+import { Redirect, Link } from 'expo-router';
 
 const Home = () => {
+  axios.request(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+          const status = response.data;
+          if (status == "Password") {
+            setErrorMessage("Incorrect Password");
+            setPassword("");
+            console.log("Password");
+          } else if (status == "User") {
+            setErrorMessage("Username Not Found");
+            console.log("Username");
+          } else {
+            console.log("Works");
+            setErrorMessage("YAY!")
+            console.log(status);
+            navigation.navigate("userhome", { name: status[0], email: status[1] });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+  // const route = useRoute();
+  // const username = route.params?.name;
+  // const email = route.params?.email;
   const [formData, setFormData] = useState({
     email: "",
     firstname: "",
@@ -68,7 +93,13 @@ const Home = () => {
         options={{
           headerStyle: { backgroundColor: COLORS.gray },
           headerShadowVisible: false,
-          headerTitle: "Sign Up"
+          headerTitle: "Sign Up",
+          headerLeft: () => (
+            <ScreenHeaderBtn iconUrl={icons.menu} dimensions="60%" />
+          ),
+          headerRight: () => (
+            <ScreenHeaderBtn iconUrl={images.profile} dimensions="100%" />
+          ),
         }}
       />
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -90,7 +121,7 @@ const Home = () => {
             onChangeText={(text) => setFormData({ ...formData, email: text })}
             value={formData.email}
           />
-          <Text></Text>
+          <Text>{email}</Text>
           <Text>First Name</Text>
           <TextInput
             style={{
@@ -103,7 +134,6 @@ const Home = () => {
             onChangeText={(text) => setFormData({ ...formData, firstname: text })}
             value={formData.firstname}
           />
-          <Text></Text>
           <Text>Last Name</Text>
           <TextInput
             style={{
@@ -116,7 +146,6 @@ const Home = () => {
             onChangeText={(text) => setFormData({ ...formData, lastname: text })}
             value={formData.lastname}
           />
-          <Text></Text>
           <Text>Password</Text>
           <TextInput
             style={{
@@ -145,25 +174,9 @@ const Home = () => {
             </Link>
           </Button>
         </View>
-        <View>
-          <Text></Text>
-          <Text></Text>
-          <Text></Text>
-          
-          <Image source={require('./aed.png')} style={styles.image} resizeMode="contain" ></Image></View>
       </ScrollView>
-      
-      </SafeAreaView>
-
-)
+    </SafeAreaView>
+  )
 }
-
-const styles = StyleSheet.create({
-image: {
-  height: 50,
-  width: 50,
-  alignSelf: "center"
-},
-})
 
 export default Home;

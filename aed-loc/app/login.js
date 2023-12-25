@@ -1,12 +1,11 @@
-import { Text, View, Pressable, ScrollView, SafeAreaView, StyleSheet } from "react-native";
+import { Text, View, Pressable, ScrollView, SafeAreaView, StyleSheet, Image } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native"
 import { useState } from 'react';
 import { Stack } from 'expo-router';
-import { COLORS, icons, images, SIZES } from "../constants";
-import { ScreenHeaderBtn } from '../components'
+import { COLORS, SIZES } from "../constants";
 import axios from "axios";
-import { Redirect, Link } from 'expo-router';
+import { Link } from 'expo-router';
 
 const Home = () => {
   const [username, setUsername] = useState("");
@@ -58,7 +57,7 @@ const Home = () => {
             console.log("Works");
             setErrorMessage("YAY!")
             console.log(status);
-            navigation.navigate("userhome", { name: status[0], email: status[1] });
+            navigation.navigate("userhome", { name: status.name, email: status.email });
           }
         })
         .catch((error) => {
@@ -74,7 +73,7 @@ const Home = () => {
         options={{
           headerStyle: { backgroundColor: COLORS.gray },
           headerShadowVisible: false,
-          headerTitle: "LOGIN",
+          headerTitle: "Log-in",
           headerTitleAlign: "left",
         }}
       />
@@ -85,6 +84,7 @@ const Home = () => {
             padding: SIZES.medium,
           }}
         >
+          
           <Text>Email</Text>
           <TextInput
             style={{
@@ -93,10 +93,12 @@ const Home = () => {
               height: 40,
               paddingLeft: 0,
               marginTop: 10,
+              marginBottom: 40
             }}
             onChangeText={(text) => setUsername(text)}
             value={username}
           />
+
           <Text>Password</Text>
           <TextInput
             style={{
@@ -105,14 +107,15 @@ const Home = () => {
               height: 40,
               paddingLeft: 5,
               marginTop: 10,
+              marginBottom: 5
             }}
             onChangeText={(text) => setPassword(text)}
             value={password}
             secureTextEntry={true}
           />
-          <Text style={{ color: "red" }}>{errorMessage}</Text>
-
-          <Button onPress={handleButtonPress} mode="contained" buttonColor='beige' textColor='black' style={styles.button}>
+          <Text style={{ color: "red", marginBottom: 50}}>{errorMessage}</Text>     
+          
+          <Button onPress={handleButtonPress} mode="contained" buttonColor= "#FAC5C5" textColor='black' style={styles.button}>
             <Link href={`/login`} asChild>
               <Pressable >
                 <View>
@@ -122,7 +125,7 @@ const Home = () => {
             </Link>
           </Button>
 
-          <Button onPress={newAccount} mode="contained" buttonColor='beige' textColor='black'>
+          <Button onPress={newAccount} mode="contained" buttonColor="#FAC5C5" textColor='black'>
             <Link href={`/signup`} asChild>
               <Pressable >
                 <View>
@@ -132,10 +135,11 @@ const Home = () => {
             </Link>
           </Button>
 
-
-
-
-        </View></ScrollView>
+        </View>
+        <View>
+          
+          <Image source={require('./aed.png')} style={styles.image} resizeMode="contain" ></Image></View>
+      </ScrollView>
     </SafeAreaView>
 
   )
@@ -143,7 +147,12 @@ const Home = () => {
 
 const styles = StyleSheet.create({
   button: {
-      marginBottom: 20,
+      marginBottom: 25,
+  },
+  image: {
+    height: 50,
+    width: 50,
+    alignSelf: "center"
   },
 })
 

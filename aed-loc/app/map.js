@@ -1,156 +1,187 @@
-import { StyleSheet, Text, View, TextInput, ScrollView, SafeAreaView, } from "react-native";
-import { Button } from "react-native-paper";
-import {useState, useRef} from 'react';
-import {Stack, useRouter, Link} from 'expo-router';
-import { COLORS, images, SIZES } from "../constants";
-import {ScreenHeaderBtn} from '../components'
-import EmergencyContact from "../components/landing/EmergencyContact";
-import MapView, {Marker} from 'react-native-maps';
-import { EvilIcons } from '@expo/vector-icons';;
-
-
+import { Stack } from 'expo-router';
+import { COLORS, SIZES } from "../constants";
+import MapView, { Marker, Callout } from 'react-native-maps';
+import React, { useState, useRef, useEffect } from "react";
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, Linking, ActivityIndicator } from "react-native";
+import { Button, Modal, Portal, PaperProvider } from "react-native-paper";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
+import axios from "axios";
 
 const Home = () => {
-  const router = useRouter();
   const [searchInput, setSearchInput] = useState("");
-  const handleChange = (e) => {
-    e.preventDefault();
-    setSearchInput(e.target.value);
+  const handleChange = (text) => {
+    setSearchInput(text);
   };
-  const markers = [
-    { latitude: 33.77509864265381, longitude: -84.3961465816308 },
-    { latitude: 33.77717572728114, longitude: -84.39589086650311 },
-    { latitude: 33.77260807592805, longitude: -84.39137794195794 },
-    { latitude: 33.771169303566744, longitude: -84.3915432378476 },
-    { latitude: 33.77377218030047 , longitude: -84.39519539004799 },
-    { latitude: 33.77319393752673 , longitude: -84.39419633666199 },
-    { latitude: 33.77286790530601 , longitude: -84.3957282185205 },
-    { latitude: 33.772295808033356 , longitude: -84.393966924403 },
-    { latitude: 33.77171755529511 , longitude: -84.39529159518885 },
-    { latitude: 33.77214201779241 , longitude: -84.39588362682498 },
-    // Add more coordinates as needed
-  ];
-const threeMarkersChosen = [
-  { latitude: 33.77509864265381, longitude: -84.3961465816308 },
-  { latitude: 33.77717572728114, longitude: -84.39589086650311 },
-  { latitude: 33.77260807592805, longitude: -84.39137794195794 },
-]
 
-const mapRef = useRef(null);
-const markersRegion = {
-  latitude: 33.7756, 
-  longitude: -84.3963, 
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
-};
-const goToNearestMarker = () => {
-  //Animate the user to new region. Complete this animation in 3 seconds
-  mapRef.current.animateToRegion(markersRegion, 1 * 1000);
-};
+  const [userLat, setUserLat] = useState();
+  const [userLong, setUserLong] = useState();
+  const [loading, setLoading] = useState(true);
+  const mapRef = useRef(null);
 
-const refocusToThreeMarkers = () => {
-  mapRef.current.fitToCoordinates(threeMarkersChosen, { edgePadding: { top: 10, right: 10, bottom: 10, left: 10 }, animated: true });
-}
+  useEffect(() => {
+    const getPermissions = async () => {
+      let {status} = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        return;
+      }
+      try {
+        let currentLocation = await Location.getCurrentPositionAsync({})
+        setUserLat(currentLocation.coords.latitude)
+        setUserLong(currentLocation.coords.longitude)
+        setLoading(false);
+      } catch(e) {
+        console.error(e)
+      }
+      
+    };
+    getPermissions();
+
+  }, []);
+
+  const [aedMarkers, setAedMarkers] = useState([]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`https://juniordesign-backend-5e050bcd1c1a.herokuapp.com/api/getAEDs?userLatitude=${userLat}&userLongitude=${userLong}`);
+        setAedMarkers(response.data);
+      } catch (error) {
+        console.error("Error fetching AED data:", error);
+      }
+    };
+  
+    fetchData();
+  }, [userLat, userLong]);
+
+  const [selectedMarker, setSelectedMarker] = useState();
+
+  const handleMarkerPress = (marker) => {
+    setSelectedMarker(marker);
+  };
+  const [visible3, setVisible3] = React.useState(false);
+  const showModal3 = () => setVisible3(true);
+  const hideModal3 = () => setVisible3(false);
+  const containerStyle = { backgroundColor: COLORS.lightWhite, padding: 20, height: 200, margin: 20 };
 
   return (
-    <SafeAreaView style = {{flex: 1, backgroundColor: COLORS.lightWhite}}>
-      <Stack.Screen 
-        options={{
-          headerStyle: {backgroundColor: COLORS.gray},
-          headerShadowVisible: false,
-          headerTitle: "",
-          headerTitleAlign: "left",
-          headerRight: () => (
-            <ScreenHeaderBtn iconUrl={images.profile} dimensions="100%" />
-          ),
-        }}
-      />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View
-          style={{
-            flex: 1,
-            padding: SIZES.medium,
+    <PaperProvider>
+      <SafeAreaView>
+        <Stack.Screen
+          options={{
+            headerStyle: {backgroundColor: COLORS.gray},
+            headerTitle: ""
           }}
-        >
-          <View style = {styles.searchBarContainer}>
-            <View style = {styles.searchBar}>
-              <EvilIcons name="search" size={20} color="black" />
-              <TextInput
-                style={{
-                  borderColor: COLORS.black,
-                  fontSize: 20,
-                  height: 30,
-                  paddingLeft: 10,
-                  margin: 10,
-                  
-                }}
-                  type="search"
-                  placeholder="Enter Location"
-                  onChange={handleChange}
-                  value={searchInput} />
+        />
+        <ScrollView>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="red"/>
+              <Text style={styles.loadingText}>Determining your current location...</Text>
             </View>
-          </View>
-          
-          <View style = {styles.options}>
-                <Button style= {styles.appButtonContainer} onPress={() => goToNearestMarker()}>
-                  <View>
-                      <Text style={styles.appButtonText}>Go To Nearest Markers</Text>
-                  </View>   
-                </Button>
-                <Button style= {styles.appButtonContainer} onPress={() => refocusToThreeMarkers()} >
-                  <View>
-                      <Text style={styles.appButtonText}>Zoom in to markers</Text>
-                  </View>  
+          ) : (
+            <View style={styles.container}>
+              <View>
+                <View style={styles.mapContainer}>
+                  <MapView
+                    ref={mapRef}
+                    style={styles.map}
+                    initialRegion={{
+                      latitude: userLat,
+                      longitude: userLong,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}
+                  >
+                    <Marker
+                        coordinate={{
+                          latitude: userLat,
+                          longitude: userLong,
+                        }}
+                        title="Current Location"
+                      >
+                      <MaterialCommunityIcons name="account-circle" size={30} color="white" />
+                    </Marker>
+                    {aedMarkers.map((aed) => (
+                      <Marker
+                        key={aed.serialnumber}
+                        coordinate={{ latitude: aed.latitude, longitude: aed.longitude }}
+                        onPress={() => handleMarkerPress(aed)}
+                      >
+                        <MaterialCommunityIcons name="heart-flash" size={30} color="red" />
+                        <Callout>
+                          {selectedMarker !== undefined && (
+                            <View style={{width: 200}}>
+                              <Text></Text>
+                              <Button mode="contained" buttonColor='red' textColor='white' onPress={() => Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${aed.latitude},${aed.longitude}&travelmode=walking`)}>
+                                Get Directions
+                              </Button>
+                              <Text></Text>
+                              <Button mode="contained" buttonColor='red' textColor='white' onPress={showModal3}>
+                                Details
+                              </Button>
+                              <Portal>
+                                <Modal visible={visible3} onDismiss={hideModal3} contentContainerStyle={containerStyle}>
+                                  <ScrollView>
+                                    <Text>Building: {selectedMarker.building}</Text>
+                                    <Text></Text>
+                                    <Text>Description: {selectedMarker.description}</Text>
+                                    <Text></Text>
+                                    <Text>Serial Number: {selectedMarker.serialnumber}</Text>
+                                    <Text></Text>
+                                    <Text>Brand: {selectedMarker.brand}</Text>
+                                    <Text></Text>
+                                    <Text>Model Number: {selectedMarker.modelnumber}</Text>
+                                    <Text></Text>
+                                    <Text>Battery Expiration Date: {selectedMarker.batteryexp}</Text>
+                                    <Text></Text>
+                                    <Text>Pad Expiration Date: {selectedMarker.padexp}</Text>
+                                    <Text></Text>
+                                    <Text>Pediatric Pad Expiration Date: {selectedMarker.pediatricexp}</Text>
+                                    <Text></Text>
+                                    <Text>Point of Contact: {selectedMarker.pointofcontact}</Text>
+                                  </ScrollView>
+                                </Modal>
+                              </Portal>
+                            </View>
+                          )}
+                        </Callout>
+                      </Marker>
+                    ))}
+                  </MapView>
+                </View>
+                <Button style={styles.emergencyButton}  mode="contained" buttonColor='red' textColor='white' onPress={() => Linking.openURL("tel:911")}>
+                    <Text style={{fontWeight: 600, fontSize: 18}}>Call 911</Text>
                 </Button>
               </View>
-          <View>
-      
-          <View style={styles.container}>
-            
-            <MapView
-              ref = {mapRef}
-              style={styles.map}
-              initialRegion={{
-                latitude: 33.7756, 
-                longitude: -84.3963, 
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-              }}
-            >
-            
-
-              {markers.map((marker, index) => (
-                <Marker
-                  key={index}
-                  coordinate={marker}
-                  clickable={true}
-                  // title={`Marker ${index + 1}`}
-                  title={"Clough Undergraduate Learning Commons "}
-                /> ))}
-
-            </MapView>
-          </View>
-          
-              <EmergencyContact></EmergencyContact>
-          </View>
-          </View></ScrollView>
-    </SafeAreaView>
-    
-  )
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </PaperProvider>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 3,
-    padding:10
+    padding: SIZES.medium
+  },
+  loadingContainer: {
+    alignItems: "center"
+  },
+  loadingText: {
+    color: "red",
+    fontSize: 18
+  },
+  mapContainer: {
+    padding: 10
   },
   map: {
-    width: '100%',
-    height: 600,
+    height: 600
   },
   options: {
     flex: 1,
-    justifyContent: 'sspace-evenly',
+    justifyContent: 'space-evenly',
     alignItems: "center",
     accessibilityRole: "button"
   },
@@ -173,9 +204,8 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderRadius: 3,
     backgroundColor: "white",
-    heigh: 10,
     marginVertical: 8,
-    paddingHorizontal: 10    
+    paddingHorizontal: 10
   },
   appButtonText: {
     fontSize: 15,

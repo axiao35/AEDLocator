@@ -5,6 +5,7 @@
     "expo-location": "~16.1.0",
     "expo-permissions": "~14.2.1",
     "react-bootstrap": "^2.9.0",
+    "react-native-get-location": "^4.0.0",
     "react-native-maps": "^1.7.1",
     "react-native-web": "^0.19.8",
     "react-router-dom": "^6.16.0"

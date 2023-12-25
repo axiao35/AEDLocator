@@ -79,7 +79,7 @@ function Landing(props) {
             />
             <Link href={`/userhome`} asChild>
                 <Pressable >
-                    <Button onPress= {onSubmit} mode="contained" buttonColor='beige' textColor='black'>
+                    <Button onPress= {onSubmit} mode="contained" buttonColor="#FAC5C5" textColor='black'>
                         <View>
                             <Text style={{color:"black"}}>Login</Text>
                         </View>
@@ -92,7 +92,7 @@ function Landing(props) {
                 <Text style={{alignSelf:"center"}}>Don't have an account? Create on here:</Text> 
                 <Link href={`/signup`} asChild>
                     <Pressable >
-                        <Button mode="contained" buttonColor='beige' textColor='black'>
+                        <Button mode="contained" buttonColor="#FAC5C5" textColor='black'>
                             <View>
                                 <Text style={{color:"black"}}>Create an account</Text>
                             </View>

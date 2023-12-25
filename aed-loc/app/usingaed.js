@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, Button, Link, Pressable } from "react-native";
-import {useState} from 'react';
-import {Stack, useRouter} from 'expo-router';
+import { StyleSheet, Image, Text, View, ScrollView, SafeAreaView } from "react-native";
+import { useState } from 'react';
+import { Stack } from 'expo-router';
 import { COLORS, images, SIZES } from "../constants";
 import {ScreenHeaderBtn} from '../components'
 import TrainingSubmit from "../components/landing/TrainingSubmit";
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { CheckBox } from 'react-native-elements';
-import { ProgressBar, MD3Colors } from 'react-native-paper';
+import { ProgressBar } from 'react-native-paper';
 
 
 const Home = () => {
@@ -57,6 +57,7 @@ const Home = () => {
           />
           <CheckBox
             title='Video Finished'
+            checkedColor="red"
             checked={vidChecked['BAWGjNAj_vA']}
             onPress={() => setVidChecked(prev => ({...prev, 'BAWGjNAj_vA': !vidChecked['BAWGjNAj_vA']}), updateProgress(!vidChecked['BAWGjNAj_vA']))}
           />
@@ -68,11 +69,16 @@ const Home = () => {
             videoId={'UFvL7wTFzl0'}
           />
           <CheckBox
+            style = {styles.check}
             title='Video Finished'
+            checkedColor="red"
             checked={vidChecked['UFvL7wTFzl0']}
             onPress={() => setVidChecked(prev => ({...prev, 'UFvL7wTFzl0': !vidChecked['UFvL7wTFzl0']}), updateProgress(!vidChecked['UFvL7wTFzl0']))}
           />
-            <ProgressBar style={styles.progressBar} progress={progressValue} color={MD3Colors.error50} />
+          <Text>
+               
+               </Text>
+            <ProgressBar style={styles.progressBar} progress={progressValue} color={progressValue == 1 ? '#6ecc06' : '#e30812'} />
 
             <Text>
                
@@ -83,7 +89,7 @@ const Home = () => {
               <TrainingSubmit></TrainingSubmit>
             }
           </View>
-          </View>
+          </View><Image source={require('./aed.png')} style={styles.image} resizeMode="contain" ></Image>
           </ScrollView>
     </SafeAreaView>
   )
@@ -98,6 +104,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
   },
+  check: {
+    backgroundColor: COLORS.lightWhite
+  },
   progressText: {
     textAlign: "center",
     padding: 10,
@@ -105,8 +114,13 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 15,
-    width: '90%',
-    left: '5%',
+    width: '95%',
+    left: '2.5%',
+  },
+  image: {
+    height: 50,
+    width: 50,
+    alignSelf: "center"
   }
 });
 

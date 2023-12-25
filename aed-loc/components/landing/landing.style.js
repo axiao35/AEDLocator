@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { COLORS } from "../../constants";
 
 screenDimensions = Dimensions.get('screen');
 
@@ -15,13 +16,16 @@ const styles = StyleSheet.create({
     height: 50,
     display: "flex",
     justifyContent: "center"
-    // alignItems: "center",
   },
   emergencyButton: {
     height: 50,
-    width: "50%",
+    width: "80%",
     display: "flex",
     justifyContent: "center",
+  },
+  image: {
+    height: 80,
+    width: 80
   },
   emergencyButtonText: {
     fontWeight: 600,
@@ -35,9 +39,12 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   modalButton: {
-    marginBottom: 10,
-    width: 140,
-    alignSelf: 'center'
+    margin: 10,
+    width: 300,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center"
   },
   modalEmergency: {
     backgroundColor: 'white',
@@ -56,7 +63,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     display: "flex",
     justifyContent: "center",
-    color: "#FBEBD8"
+    color: "#FAC5C5",
   },
   loginButton: {
     marginTop: 50,
@@ -68,12 +75,13 @@ const styles = StyleSheet.create({
   },
     wrapper: {
     flex: 3,
-    backgroundColor: "white",
+    backgroundColor: COLORS.lightWhite
   },
     userWrapper: {
     justifyContent: 'center',
     alignItems: "center",
-    marginTop: 40
+    marginTop: 40,
+    backgroundColor: COLORS.lightWhite
   },
     username: {
     color: "black",
